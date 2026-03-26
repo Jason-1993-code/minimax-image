@@ -86,14 +86,27 @@ describe("MiniMax Image Generation", () => {
   });
 
   describe("generateImage - parameter validation", () => {
-    it("should throw when inputImages is provided for text-to-image", async () => {
-      await expect(
-        generateImage(
-          { prompt: "test", inputImages: [{ url: "http://test.com/image.png" }] },
+    it("should include subject_reference in request body when inputImages is provided", async () => {
+      const mockBuffer = Buffer.from("fake-image-data");
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { image_urls: [] } }),
+      });
+
+      try {
+        await generateImage(
+          { prompt: "test", inputImages: [{ buffer: mockBuffer, mimeType: "image/png" }] },
           {},
           "test-key"
-        )
-      ).rejects.toThrow("inputImages is not supported for text-to-image generation");
+        );
+      } catch {
+      }
+
+      const call = mockFetch.mock.calls[0];
+      const body = JSON.parse(call[1].body);
+      expect(body.subject_reference).toEqual([
+        { type: "character", image_file: "data:image/png;base64,ZmFrZS1pbWFnZS1kYXRh" },
+      ]);
     });
 
     it("should throw when width is provided without height", async () => {
@@ -561,8 +574,8 @@ describe("MiniMax Image Generation", () => {
       expect(CAPABILITIES.generate.supportsAspectRatio).toBe(true);
     });
 
-    it("should have edit disabled", () => {
-      expect(CAPABILITIES.edit.enabled).toBe(false);
+    it("should have edit enabled", () => {
+      expect(CAPABILITIES.edit.enabled).toBe(true);
     });
 
     it("should have correct aspect ratios", () => {

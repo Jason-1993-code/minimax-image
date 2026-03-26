@@ -2,7 +2,7 @@
   "id": "minimax-image",
   "kind": "provider",
   "name": "MiniMax Image",
-  "description": "MiniMax image generation provider (text-to-image)",
+  "description": "MiniMax image generation provider (text-to-image and image-to-image)",
   "version": "1.0.0",
   "providers": ["minimax-image"],
   "providerAuthEnvVars": {

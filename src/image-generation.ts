@@ -126,7 +126,7 @@ export const CAPABILITIES: ImageGenerationProviderCapabilities = {
     supportsAspectRatio: true,
   },
   edit: {
-    enabled: false,
+    enabled: true,
   },
   geometry: {
     aspectRatios: ["1:1", "16:9", "4:3", "3:2", "2:3", "3:4", "9:16", "21:9"],
@@ -190,10 +190,6 @@ export async function generateImage(
   apiKey?: string
 ): Promise<ImageGenerationResult> {
   const miniConfig = { ...DEFAULT_CONFIG, ...config };
-
-  if (req.inputImages && req.inputImages.length > 0) {
-    throw new Error("inputImages is not supported for text-to-image generation. Use image-01-live model for image editing.");
-  }
 
   const resolvedApiKey = resolveApiKey(apiKey, req.cfg, req.authStore, req.agentDir);
   if (!resolvedApiKey) {
@@ -294,6 +290,14 @@ export async function generateImage(
 
   if (req.count) {
     body.n = req.count;
+  }
+
+  if (req.inputImages && req.inputImages.length > 0) {
+    body.subject_reference = req.inputImages.map(img => {
+      const mimeType = img.mimeType || "image/png";
+      const base64 = img.buffer.toString("base64");
+      return { type: "character" as const, image_file: `data:${mimeType};base64,${base64}` };
+    });
   }
 
   const response = await fetch(url, {

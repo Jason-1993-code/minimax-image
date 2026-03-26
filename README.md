@@ -1,10 +1,10 @@
 # MiniMax Image Generation Plugin
 
-OpenClaw plugin for MiniMax text-to-image generation via the official MiniMax Image Generation API.
+OpenClaw plugin for MiniMax text-to-image and image-to-image generation via the official MiniMax Image Generation API.
 
 ## Features
 
-- Text-to-image generation via MiniMax API
+- Text-to-image (T2I) and image-to-image (I2I) generation via MiniMax API
 - Dual model support: `image-01` and `image-01-live`
 - Multiple aspect ratios: 1:1, 16:9, 4:3, 3:2, 2:3, 3:4, 9:16, 21:9
 - Output formats: URL (remote download) or base64 (inline)
@@ -13,6 +13,7 @@ OpenClaw plugin for MiniMax text-to-image generation via the official MiniMax Im
 - Style parameter (image-01-live only)
 - Custom dimensions (image-01 only)
 - Reproducible results with seed parameter
+- Image-to-image via subject_reference (character-based reference)
 
 ## Installation
 
@@ -172,6 +173,21 @@ openclaw chat "Generate a photo of a cat"
 ```
 
 The LLM will automatically call the `image_generate` tool, and OpenClaw will route to `minimax-image`.
+
+### Image-to-Image (I2I)
+
+When the chat includes an image reference, the plugin sends the image as `subject_reference` (character reference) to the MiniMax API:
+
+```bash
+openclaw chat "Generate a similar style image based on this picture"
+# attach a reference image
+```
+
+I2I requirements:
+- Reference image must contain a person (`type: "character"`)
+- Supports public URLs or base64 Data URLs
+- Supports JPG, JPEG, PNG formats, < 10MB
+- Both models (image-01 / image-01-live) support I2I
 
 ### Code Usage
 

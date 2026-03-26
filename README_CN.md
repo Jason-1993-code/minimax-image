@@ -1,10 +1,10 @@
 # MiniMax 图像生成插件
 
-适用于 OpenClaw 的 MiniMax 文生图插件，基于官方 MiniMax Image Generation API。
+适用于 OpenClaw 的 MiniMax 文生图插件，基于官方 MiniMax Image Generation API，支持**文生图（T2I）**和**图生图（I2I）**。
 
 ## 功能特性
 
-- 基于 MiniMax API 的文生图能力
+- 基于 MiniMax API 的文生图和图生图能力
 - 支持 `image-01` 和 `image-01-live` 双模型
 - 多种画面比例：1:1、16:9、4:3、3:2、2:3、3:4、9:16、21:9
 - 输出格式可选 URL（远程下载）或 base64（内嵌）
@@ -13,6 +13,7 @@
 - Style 参数（仅 image-01-live 支持）
 - 自定义尺寸（仅 image-01 支持）
 - 随机种子（seed），可复现图片
+- 图生图支持（通过 subject_reference 传入参考图片）
 
 ## 安装
 
@@ -172,6 +173,21 @@ openclaw chat "生成一张猫的照片"
 ```
 
 LLM 会自动调用 `image_generate` 工具，OpenClaw 将请求路由到 `minimax-image`。
+
+### 图生图（I2I）
+
+当对话中包含图片引用时，插件会将图片作为 `subject_reference`（人物主体参考）发送给 MiniMax API：
+
+```bash
+openclaw chat "根据这张图生成一幅类似的风格"
+# 并附上一张参考图片
+```
+
+图生图要求：
+- 参考图片需包含人物（`type: "character"`）
+- 支持公网 URL 或 base64 Data URL
+- 支持 JPG、JPEG、PNG 格式，大小 < 10MB
+- 两个模型（image-01 / image-01-live）均支持图生图
 
 ### 代码调用
 
