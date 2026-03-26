@@ -50,3 +50,16 @@ jobs:
             --notes "Initial release of MiniMax Image Plugin" \
             "minimax-image-${VERSION}.zip" \
             "minimax-image-${VERSION}.tar.gz"
+
+      - name: Install clawhub
+        run: npm install -g clawhub
+
+      - name: Publish to ClawHub
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: |
+          clawhub login --token $CLAWHUB_TOKEN
+          clawhub package publish . \
+            --source-repo Jason-1993-code/minimax-image \
+            --source-commit ${{ github.sha }} \
+            --version ${{ github.ref_name }}
