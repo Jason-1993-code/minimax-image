@@ -36,12 +36,14 @@ jobs:
           git archive --format=tar.gz -o minimax-image-${VERSION}.tar.gz HEAD
 
       - name: Create Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          gh release create $VERSION \
+          echo "Creating release for version: $VERSION"
+          ls -la
+          gh release create "$VERSION" \
             --title "MiniMax Image Plugin $VERSION" \
-            --notes "Release $VERSION" \
-            minimax-image-${VERSION}.zip \
-            minimax-image-${VERSION}.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            --notes "Initial release of MiniMax Image Plugin" \
+            "minimax-image-${VERSION}.zip" \
+            "minimax-image-${VERSION}.tar.gz"
