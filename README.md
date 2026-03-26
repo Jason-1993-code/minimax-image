@@ -18,7 +18,7 @@ OpenClaw plugin for MiniMax text-to-image and image-to-image generation via the 
 ## Installation
 
 ```bash
-openclaw plugins install /path/to/minimax-image
+openclaw plugins install @openclaw/minimax-image
 ```
 
 Verify installation:

@@ -18,7 +18,7 @@
 ## 安装
 
 ```bash
-openclaw plugins install /path/to/minimax-image
+openclaw plugins install @openclaw/minimax-image
 ```
 
 安装后验证：
@@ -264,6 +264,6 @@ npm run test
 npm run dev
 ```
 
-## License
+## 许可证
 
 MIT
