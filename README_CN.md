@@ -15,10 +15,23 @@
 - 随机种子（seed），可复现图片
 - 图生图支持（通过 subject_reference 传入参考图片）
 
+## 相关文档
+
+- [MiniMax T2I API 文档](https://platform.minimaxi.com/docs/api-reference/image-generation-t2i.md)
+- [MiniMax I2I API 文档](https://platform.minimaxi.com/docs/api-reference/image-generation-i2i.md)
+
 ## 安装
 
 ```bash
 openclaw plugins install @openclaw/minimax-image
+```
+
+### 离线安装
+
+从 [GitHub Releases](https://github.com/Jason-1993-code/minimax-image/releases) 下载安装包，使用本地路径安装：
+
+```bash
+openclaw plugins install https://github.com/Jason-1993-code/minimax-image/releases/download/v1.1.0/minimax-image-1.1.0.zip
 ```
 
 安装后验证：

@@ -15,10 +15,23 @@ OpenClaw plugin for MiniMax text-to-image and image-to-image generation via the 
 - Reproducible results with seed parameter
 - Image-to-image via subject_reference (character-based reference)
 
+## Related Documentation
+
+- [MiniMax T2I API Docs](https://platform.minimaxi.com/docs/api-reference/image-generation-t2i.md)
+- [MiniMax I2I API Docs](https://platform.minimaxi.com/docs/api-reference/image-generation-i2i.md)
+
 ## Installation
 
 ```bash
 openclaw plugins install @openclaw/minimax-image
+```
+
+### Offline Installation
+
+Download the plugin package from [GitHub Releases](https://github.com/Jason-1993-code/minimax-image/releases) and install via local path:
+
+```bash
+openclaw plugins install https://github.com/Jason-1993-code/minimax-image/releases/download/v1.1.0/minimax-image-1.1.0.zip
 ```
 
 Verify installation:
