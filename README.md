@@ -1,0 +1,253 @@
+# MiniMax Image Generation Plugin
+
+OpenClaw plugin for MiniMax text-to-image generation via the official MiniMax Image Generation API.
+
+## Features
+
+- Text-to-image generation via MiniMax API
+- Dual model support: `image-01` and `image-01-live`
+- Multiple aspect ratios: 1:1, 16:9, 4:3, 3:2, 2:3, 3:4, 9:16, 21:9
+- Output formats: URL (remote download) or base64 (inline)
+- Prompt optimizer
+- AIGC watermark embedding
+- Style parameter (image-01-live only)
+- Custom dimensions (image-01 only)
+- Reproducible results with seed parameter
+
+## Installation
+
+```bash
+openclaw plugins install /path/to/minimax-image
+```
+
+Verify installation:
+
+```bash
+openclaw plugins list
+# Confirm minimax-image appears in the plugin list
+
+openclaw plugins inspect minimax-image
+# Confirm Capabilities include image-generation: minimax-image
+```
+
+## How It Works
+
+OpenClaw exposes image generation through a unified `image_generate` tool. When a user requests an image:
+
+```
+User Input → LLM decides to use a tool → image_generate tool
+  → OpenClaw queries ImageGenerationProvider routing
+  → minimax-image.generateImage() is called
+  → MiniMax API returns image → User receives image
+```
+
+Key: `minimax-image` (image generation) and `minimax-portal` (text chat) are **two separate providers**. Image generation requests need `imageGenerationModel` pointed to `minimax-image`, otherwise the LLM won't route to this plugin automatically.
+
+## Configuration
+
+### Step 1: Configure API Key
+
+MiniMax image generation and text models share the **same API key**.
+
+#### Option A: Use existing environment variable (recommended)
+
+If you already have MiniMax text models configured with `MINIMAX_API_KEY`, the plugin will look for `MINIMAX_IMAGE_API_KEY` first, then fall back to `MINIMAX_API_KEY`.
+
+```bash
+# Set once, shared for both text and image
+export MINIMAX_API_KEY="your-minimax-api-key"
+```
+
+#### Option B: Set image-specific key
+
+```bash
+export MINIMAX_IMAGE_API_KEY="your-image-specific-key"
+```
+
+#### Option C: Via config file
+
+In `openclaw.json` under `plugins.entries.minimax-image.config`:
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "minimax-image": {
+        "enabled": true,
+        "config": {
+          "apiKey": "your-api-key",
+          "endpoint": "global",
+          "model": "image-01",
+          "aspectRatio": "1:1",
+          "responseFormat": "url",
+          "n": 1
+        }
+      }
+    }
+  }
+}
+```
+
+> Warning: API keys in config files are stored in plaintext. Environment variables are recommended.
+
+### Step 2: Configure Image Generation Routing (Required)
+
+This is the **required step** to make chat models route image generation requests to this plugin.
+
+Add to `openclaw.json` under `agents.defaults`:
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "imageGenerationModel": "minimax-image"
+    }
+  }
+}
+```
+
+Or specify a concrete model:
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "imageGenerationModel": {
+        "primary": "minimax-image/image-01-live",
+        "fallbacks": ["minimax-image/image-01"]
+      }
+    }
+  }
+}
+```
+
+**The three OpenClaw Agent model config options:**
+
+| Config key | Purpose | Example |
+|------------|---------|---------|
+| `model` | Text inference model | `"minimax-portal/MiniMax-M2.7"` |
+| `imageModel` | Inference model that understands image input | `"minimax/MiniMax-VL-01"` |
+| `imageGenerationModel` | **Image generation model** | `"minimax-image"` |
+
+Restart the gateway for changes to take effect:
+
+```bash
+openclaw gateway restart
+```
+
+## Configuration Reference
+
+### Plugin Config (plugins.entries.minimax-image.config)
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `apiKey` | string | - | API key (optional, env vars take priority) |
+| `endpoint` | `global` \| `cn` | `global` | API endpoint |
+| `model` | `image-01` \| `image-01-live` | `image-01` | Default model |
+| `aspectRatio` | string | `1:1` | Aspect ratio |
+| `responseFormat` | `url` \| `base64` | `url` | Output format |
+| `n` | number (1-9) | `1` | Number of images to generate |
+| `promptOptimizer` | boolean | `false` | Enable prompt optimizer |
+| `aigcWatermark` | boolean | `false` | Embed AIGC watermark |
+| `style` | string | - | Style parameter (image-01-live only) |
+| `width` | number | - | Image width in pixels (image-01 only) |
+| `height` | number | - | Image height in pixels (image-01 only) |
+| `seed` | number | - | Random seed for reproducibility |
+
+### Model-Specific Parameters
+
+- **image-01**: supports `width`, `height` (512-2048, multiples of 8), `seed`
+- **image-01-live**: supports `style`, `seed`
+
+When both `aspect_ratio` and `width/height` are provided, `aspect_ratio` takes priority.
+
+## Usage
+
+### Chat Trigger (Recommended)
+
+After completing "Step 2: Configure Image Generation Routing", simply chat:
+
+```bash
+openclaw chat "Generate a photo of a cat"
+```
+
+The LLM will automatically call the `image_generate` tool, and OpenClaw will route to `minimax-image`.
+
+### Code Usage
+
+```typescript
+import { generateImage } from "@openclaw/minimax-image";
+
+const result = await generateImage(
+  { prompt: "A beautiful sunset over the ocean" },
+  {
+    endpoint: "global",
+    model: "image-01",
+    aspectRatio: "16:9",
+    responseFormat: "url",
+    n: 1,
+  },
+  "your-api-key"
+);
+
+console.log(result.images[0].buffer);
+```
+
+## Error Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1002 | Rate limit exceeded |
+| 1004 | Invalid parameters or authentication failure |
+| 1008 | Insufficient account balance |
+| 1026 | Content violates policy |
+| 2013 | Authentication failure |
+| 2049 | Content moderation blocked |
+
+## API Endpoints
+
+| Region | Base URL |
+|--------|----------|
+| Global | `https://api.minimax.io` |
+| CN | `https://api.minimaxi.com` |
+
+## Authentication Priority
+
+The plugin searches for API keys in the following order:
+
+1. Environment variable `MINIMAX_IMAGE_API_KEY` (highest priority)
+2. Environment variable `MINIMAX_API_KEY` (same as official MiniMax provider, fallback)
+3. Plugin config `plugins.entries.minimax-image.config.apiKey`
+4. OpenClaw Auth Profile `minimax-image` API Key credential
+
+## Relationship with minimax-portal
+
+| | minimax-image (this plugin) | minimax-portal (built-in) |
+|--|------------------------------|---------------------------|
+| **Capability** | Image generation | Text chat / LLM |
+| **Provider ID** | `minimax-image` | `minimax-portal` |
+| **Routes via `imageGenerationModel`** | ✅ | ❌ |
+| **Routes via `model`** | ❌ | ✅ |
+
+The two are independent. Both share the same credential system via `MINIMAX_API_KEY`.
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Build TypeScript
+npm run build
+
+# Run unit tests
+npm run test
+
+# Watch mode (development)
+npm run dev
+```
+
+## License
+
+MIT

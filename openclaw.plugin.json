@@ -1,0 +1,102 @@
+{
+  "id": "minimax-image",
+  "kind": "provider",
+  "name": "MiniMax Image",
+  "description": "MiniMax image generation provider (text-to-image)",
+  "version": "1.0.0",
+  "providers": ["minimax-image"],
+  "providerAuthEnvVars": {
+    "minimax-image": ["MINIMAX_IMAGE_API_KEY"]
+  },
+  "providerAuthChoices": [
+    {
+      "provider": "minimax-image",
+      "method": "api-key",
+      "choiceId": "minimax-image-global",
+      "choiceLabel": "MiniMax Image (Global)",
+      "groupId": "minimax-image",
+      "groupLabel": "MiniMax Image",
+      "optionKey": "minimaxImageGlobalApiKey",
+      "cliFlag": "--minimax-image-global-api-key",
+      "cliOption": "--minimax-image-global-api-key <key>",
+      "cliDescription": "MiniMax Image Global API Key (api.minimax.io)",
+      "onboardingScopes": ["image-generation"]
+    },
+    {
+      "provider": "minimax-image",
+      "method": "api-key",
+      "choiceId": "minimax-image-cn",
+      "choiceLabel": "MiniMax Image (CN)",
+      "groupId": "minimax-image",
+      "groupLabel": "MiniMax Image",
+      "optionKey": "minimaxImageCnApiKey",
+      "cliFlag": "--minimax-image-cn-api-key",
+      "cliOption": "--minimax-image-cn-api-key <key>",
+      "cliDescription": "MiniMax Image CN API Key (api.minimaxi.com)",
+      "onboardingScopes": ["image-generation"]
+    }
+  ],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "apiKey": {
+        "type": "string"
+      },
+      "endpoint": {
+        "type": "string",
+        "enum": ["global", "cn"],
+        "default": "global"
+      },
+      "model": {
+        "type": "string",
+        "enum": ["image-01", "image-01-live"],
+        "default": "image-01"
+      },
+      "aspectRatio": {
+        "type": "string",
+        "enum": ["1:1", "16:9", "4:3", "3:2", "2:3", "3:4", "9:16", "21:9"],
+        "default": "1:1"
+      },
+      "responseFormat": {
+        "type": "string",
+        "enum": ["url", "base64"],
+        "default": "url"
+      },
+      "n": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 9,
+        "default": 1
+      },
+      "promptOptimizer": {
+        "type": "boolean",
+        "default": false
+      },
+      "aigcWatermark": {
+        "type": "boolean",
+        "default": false
+      },
+      "style": {
+        "type": "string",
+        "description": "Style parameter (only for image-01-live model)"
+      },
+      "width": {
+        "type": "integer",
+        "description": "Image width in pixels (only for image-01, must be between 512-2048, divisible by 8)",
+        "minimum": 512,
+        "maximum": 2048
+      },
+      "height": {
+        "type": "integer",
+        "description": "Image height in pixels (only for image-01, must be between 512-2048, divisible by 8)",
+        "minimum": 512,
+        "maximum": 2048
+      },
+      "seed": {
+        "type": "integer",
+        "description": "Random seed for reproducible images"
+      }
+    }
+  }
+}
