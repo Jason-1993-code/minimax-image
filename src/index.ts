@@ -30,7 +30,7 @@ export interface MiniMaxImagePluginConfig {
 export default definePluginEntry({
   id: "minimax-image",
   name: "MiniMax Image",
-  description: "MiniMax image generation provider (text-to-image)",
+  description: "MiniMax image generation provider (text-to-image and image-to-image)",
   register(api) {
     // Register the MiniMax image generation provider
     const provider: ImageGenerationProvider = {

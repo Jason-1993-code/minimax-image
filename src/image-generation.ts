@@ -52,12 +52,6 @@ interface ImageGenerationGeometryCapabilities {
   resolutions?: ("1K" | "2K" | "4K")[];
 }
 
-interface ImageGenerationProviderCapabilities {
-  generate: ImageGenerationModeCapabilities;
-  edit: ImageGenerationEditCapabilities;
-  geometry?: ImageGenerationGeometryCapabilities;
-}
-
 const ERROR_MESSAGES: Record<number, string> = {
   0: "success",
   1002: "rate limit exceeded",
@@ -120,7 +114,11 @@ export function getBaseUrl(endpoint: "global" | "cn"): string {
 /**
  * MiniMax Image Generation capabilities
  */
-export const CAPABILITIES: ImageGenerationProviderCapabilities = {
+export const CAPABILITIES: {
+  generate: ImageGenerationModeCapabilities;
+  edit: ImageGenerationEditCapabilities;
+  geometry?: ImageGenerationGeometryCapabilities;
+} = {
   generate: {
     maxCount: 9,
     supportsAspectRatio: true,
