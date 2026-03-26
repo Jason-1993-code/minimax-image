@@ -160,7 +160,58 @@ describe("MiniMax Image Generation", () => {
       expect(body.aspect_ratio).toBe("16:9");
     });
 
-    it("should throw when width is provided without height", async () => {
+    it("should not set aspect_ratio for image-01-live with I2I", async () => {
+      const pngHeader = Buffer.from([
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+        0x00, 0x00, 0x00, 0x0D,
+        0x49, 0x48, 0x44, 0x52,
+        0x00, 0x00, 0x07, 0x80,
+        0x00, 0x00, 0x04, 0x38,
+        0x08, 0x02, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+      ]);
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { image_base64: ["SGVsbG8gV29ybGQ="] } }),
+      });
+
+      try {
+        await generateImage(
+          { prompt: "transform this", inputImages: [{ buffer: pngHeader, mimeType: "image/png" }] },
+          { model: "image-01-live" },
+          "test-key"
+        );
+      } catch {
+      }
+
+      const call = mockFetch.mock.calls[0];
+      const body = JSON.parse(call[1].body);
+      expect(body.aspect_ratio).toBeUndefined();
+      expect(body.subject_reference).toBeDefined();
+      expect(body.model).toBe("image-01-live");
+    });
+
+    it("should set style for image-01-live model", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { image_base64: ["SGVsbG8gV29ybGQ="] } }),
+      });
+
+      try {
+        await generateImage(
+          { prompt: "test" },
+          { model: "image-01-live", style: "漫画", styleWeight: 0.5 },
+          "test-key"
+        );
+      } catch {
+      }
+
+      const call = mockFetch.mock.calls[0];
+      const body = JSON.parse(call[1].body);
+      expect(body.style).toEqual({ style_type: "漫画", style_weight: 0.5 });
+    });
+
+    it("should throw when width/height with image-01-live model", async () => {
       await expect(
         generateImage(
           { prompt: "test" },
@@ -200,24 +251,48 @@ describe("MiniMax Image Generation", () => {
       ).rejects.toThrow("height must be between 512 and 2048, and divisible by 8");
     });
 
-    it("should throw when width/height with image-01-live model", async () => {
-      await expect(
-        generateImage(
+    it("should silently ignore width/height for image-01-live model", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { image_base64: ["SGVsbG8gV29ybGQ="] } }),
+      });
+
+      try {
+        await generateImage(
           { prompt: "test" },
           { model: "image-01-live", width: 1024, height: 1024 },
           "test-key"
-        )
-      ).rejects.toThrow("width/height parameters are only supported for image-01 model");
+        );
+      } catch {
+      }
+
+      const call = mockFetch.mock.calls[0];
+      const body = JSON.parse(call[1].body);
+      expect(body.width).toBeUndefined();
+      expect(body.height).toBeUndefined();
+      expect(body.style).toBeUndefined();
+      expect(body.model).toBe("image-01-live");
     });
 
-    it("should throw when style with non-live model", async () => {
-      await expect(
-        generateImage(
+    it("should silently ignore style for image-01 model", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { image_base64: ["SGVsbG8gV29ybGQ="] } }),
+      });
+
+      try {
+        await generateImage(
           { prompt: "test" },
           { model: "image-01", style: "some-style" },
           "test-key"
-        )
-      ).rejects.toThrow("style parameter is only supported for image-01-live model");
+        );
+      } catch {
+      }
+
+      const call = mockFetch.mock.calls[0];
+      const body = JSON.parse(call[1].body);
+      expect(body.style).toBeUndefined();
+      expect(body.model).toBe("image-01");
     });
 
     it("should throw when n/count is out of range", async () => {
@@ -250,14 +325,24 @@ describe("MiniMax Image Generation", () => {
       ).rejects.toThrow("size parameter is not supported");
     });
 
-    it("should throw when resolution is provided", async () => {
-      await expect(
-        generateImage(
+    it("should silently ignore resolution (not supported by MiniMax API)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { image_base64: ["SGVsbG8gV29ybGQ="] } }),
+      });
+
+      try {
+        await generateImage(
           { prompt: "test", resolution: "2K" } as any,
           {},
           "test-key"
-        )
-      ).rejects.toThrow("resolution parameter is not supported");
+        );
+      } catch {
+      }
+
+      const call = mockFetch.mock.calls[0];
+      const body = JSON.parse(call[1].body);
+      expect(body.resolution).toBeUndefined();
     });
 
     it("should prioritize req.aspectRatio over width/height", async () => {
@@ -316,25 +401,15 @@ describe("MiniMax Image Generation", () => {
       } catch {
       }
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        "https://api.minimax.io/v1/image_generation",
-        expect.objectContaining({
-          method: "POST",
-          headers: expect.objectContaining({
-            "Content-Type": "application/json",
-            Authorization: "Bearer test-key",
-          }),
-          body: JSON.stringify({
-            model: "image-01",
-            prompt: "a cat",
-            aspect_ratio: "1:1",
-            response_format: "url",
-            n: 1,
-            prompt_optimizer: false,
-            aigc_watermark: false,
-          }),
-        })
-      );
+      const call = mockFetch.mock.calls[0];
+      const body = JSON.parse(call[1].body);
+      expect(body.model).toBe("image-01");
+      expect(body.prompt).toBe("a cat");
+      expect(body.aspect_ratio).toBe("1:1");
+      expect(body.response_format).toBe("url");
+      expect(body.n).toBe(1);
+      expect(body.prompt_optimizer).toBe(false);
+      expect(body.aigc_watermark).toBe(false);
     });
 
     it("should use req.model over config model", async () => {

@@ -284,28 +284,22 @@ export async function generateImage(
   const url = `${baseUrl}/v1/image_generation`;
 
   const effectiveModel = req.model || miniConfig.model;
-  
-  if (effectiveModel === "image-01-live" && miniConfig.style) {
+
+  if (effectiveModel === "image-01-live") {
     if (miniConfig.width || miniConfig.height) {
-      throw new Error("width/height parameters are only supported for image-01 model, not image-01-live");
+      if (miniConfig.style) {
+        throw new Error("width/height and style cannot both be set for image-01-live model");
+      }
     }
   }
 
-  if (miniConfig.style && effectiveModel !== "image-01-live") {
-    throw new Error("style parameter is only supported for image-01-live model");
-  }
-  
-  if ((miniConfig.width || miniConfig.height) && effectiveModel !== "image-01") {
-    throw new Error("width/height parameters are only supported for image-01 model");
-  }
-  
   if (miniConfig.width && !miniConfig.height) {
     throw new Error("width must be provided together with height");
   }
   if (miniConfig.height && !miniConfig.width) {
     throw new Error("height must be provided together with width");
   }
-  
+
   if (miniConfig.width !== undefined) {
     if (miniConfig.width < 512 || miniConfig.width > 2048 || miniConfig.width % 8 !== 0) {
       throw new Error("width must be between 512 and 2048, and divisible by 8");
@@ -330,35 +324,35 @@ export async function generateImage(
   if (req.size && !req.inputImages?.length) {
     throw new Error("size parameter is not supported for text-to-image generation");
   }
-  if (req.resolution && !req.inputImages?.length) {
-    throw new Error("resolution parameter is not supported for text-to-image generation");
-  }
 
   const body: Record<string, unknown> = {
     model: effectiveModel,
     prompt: req.prompt,
-    aspect_ratio: miniConfig.aspectRatio,
     response_format: miniConfig.responseFormat,
     n: miniConfig.n,
     prompt_optimizer: miniConfig.promptOptimizer,
     aigc_watermark: miniConfig.aigcWatermark,
   };
 
-  if (miniConfig.style && effectiveModel === "image-01-live") {
+  if (effectiveModel === "image-01") {
+    if (req.aspectRatio) {
+      body.aspect_ratio = req.aspectRatio;
+    } else if (miniConfig.width && miniConfig.height) {
+      body.width = miniConfig.width;
+      body.height = miniConfig.height;
+    } else {
+      body.aspect_ratio = miniConfig.aspectRatio;
+    }
+  }
+
+  if (effectiveModel === "image-01-live" && miniConfig.style) {
     const style: Record<string, unknown> = { style_type: miniConfig.style };
     if (miniConfig.styleWeight !== undefined) {
       style.style_weight = miniConfig.styleWeight;
     }
     body.style = style;
   }
-  
-  if (req.aspectRatio) {
-    body.aspect_ratio = req.aspectRatio;
-  } else if (miniConfig.width && miniConfig.height) {
-    body.width = miniConfig.width;
-    body.height = miniConfig.height;
-  }
-  
+
   if (miniConfig.seed !== undefined) {
     body.seed = miniConfig.seed;
   }
@@ -368,10 +362,12 @@ export async function generateImage(
   }
 
   if (req.inputImages && req.inputImages.length > 0) {
-    const firstImage = req.inputImages[0];
-    const inferredDimensions = getImageDimensions(firstImage.buffer);
-    if (inferredDimensions) {
-      body.aspect_ratio = mapToClosestAspectRatio(inferredDimensions.width, inferredDimensions.height);
+    if (effectiveModel === "image-01") {
+      const firstImage = req.inputImages[0];
+      const inferredDimensions = getImageDimensions(firstImage.buffer);
+      if (inferredDimensions) {
+        body.aspect_ratio = mapToClosestAspectRatio(inferredDimensions.width, inferredDimensions.height);
+      }
     }
 
     body.subject_reference = req.inputImages.map(img => {
@@ -473,7 +469,7 @@ export async function generateImage(
     throw new Error("No images returned from MiniMax API");
   }
 
-  const finalAspectRatio = req.aspectRatio || miniConfig.aspectRatio;
+  const finalAspectRatio = (body.aspect_ratio as string) || miniConfig.aspectRatio;
 
   return {
     images,
