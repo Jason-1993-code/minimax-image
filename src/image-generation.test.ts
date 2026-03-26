@@ -109,6 +109,28 @@ describe("MiniMax Image Generation", () => {
       ]);
     });
 
+    it("should throw when inputImages has unsupported MIME type", async () => {
+      const mockBuffer = Buffer.from("fake-video-data");
+      await expect(
+        generateImage(
+          { prompt: "test", inputImages: [{ buffer: mockBuffer, mimeType: "video/mp4" }] },
+          {},
+          "test-key"
+        )
+      ).rejects.toThrow("Unsupported image type: video/mp4. Supported: JPG, JPEG, PNG");
+    });
+
+    it("should throw when inputImages exceeds 10MB limit", async () => {
+      const largeBuffer = Buffer.alloc(11 * 1024 * 1024); // 11MB
+      await expect(
+        generateImage(
+          { prompt: "test", inputImages: [{ buffer: largeBuffer, mimeType: "image/png" }] },
+          {},
+          "test-key"
+        )
+      ).rejects.toThrow("Image size exceeds 10MB limit");
+    });
+
     it("should throw when width is provided without height", async () => {
       await expect(
         generateImage(
@@ -422,10 +444,12 @@ describe("MiniMax Image Generation", () => {
         })
         .mockResolvedValueOnce({
           ok: true,
+          headers: { get: () => "image/png" },
           arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
         })
         .mockResolvedValueOnce({
           ok: true,
+          headers: { get: () => "image/png" },
           arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
         });
 
@@ -465,6 +489,7 @@ describe("MiniMax Image Generation", () => {
         })
         .mockResolvedValueOnce({
           ok: true,
+          headers: { get: () => "image/png" },
           arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
         });
 

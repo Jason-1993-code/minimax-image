@@ -77,6 +77,16 @@ const DEFAULT_CONFIG: MiniMaxImageConfig = {
   aigcWatermark: false,
 };
 
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"];
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
+function detectMimeType(base64: string): string {
+  const bytes = Buffer.from(base64.slice(0, 24), "base64");
+  if (bytes[0] === 0x89 && bytes[1] === 0x50) return "image/png";
+  if (bytes[0] === 0xFF && bytes[1] === 0xD8) return "image/jpeg";
+  return "image/png";
+}
+
 export function resolveApiKey(
   configApiKey: string | undefined,
   cfg?: any,
@@ -143,9 +153,13 @@ function parseMiniMaxError(data: MiniMaxErrorResponse): Error {
   return new Error("MiniMax API returned an unknown error");
 }
 
-async function downloadImage(url: string, timeoutMs?: number, retries = 2): Promise<Buffer> {
+async function downloadImage(
+  url: string,
+  timeoutMs?: number,
+  retries = 2
+): Promise<{ buffer: Buffer; mimeType: string }> {
   const attempts: Array<{ status?: number; error?: string }> = [];
-  
+
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const controller = new AbortController();
@@ -162,8 +176,10 @@ async function downloadImage(url: string, timeoutMs?: number, retries = 2): Prom
         throw new Error(`HTTP ${response.status}`);
       }
 
+      const contentType = response.headers.get("content-type") || "image/png";
+      const mimeType = contentType.split(";")[0].trim().toLowerCase();
       const buffer = await response.arrayBuffer();
-      return Buffer.from(buffer);
+      return { buffer: Buffer.from(buffer), mimeType };
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
         attempts.push({ error: `timeout after ${timeoutMs || 30000}ms` });
@@ -174,11 +190,11 @@ async function downloadImage(url: string, timeoutMs?: number, retries = 2): Prom
       }
     }
   }
-  
-  const attemptSummary = attempts.map((a, i) => 
+
+  const attemptSummary = attempts.map((a, i) =>
     `attempt ${i + 1}: ${a.status ? `HTTP ${a.status}` : a.error}`
   ).join("; ");
-  
+
   throw new Error(`Image download failed after ${retries + 1} attempts [${attemptSummary}] from ${url}`);
 }
 
@@ -292,7 +308,17 @@ export async function generateImage(
 
   if (req.inputImages && req.inputImages.length > 0) {
     body.subject_reference = req.inputImages.map(img => {
-      const mimeType = img.mimeType || "image/png";
+      const mimeType = (img.mimeType || "image/png").toLowerCase();
+      if (!ALLOWED_IMAGE_TYPES.includes(mimeType)) {
+        throw new Error(
+          `Unsupported image type: ${mimeType}. Supported: JPG, JPEG, PNG`
+        );
+      }
+      if (img.buffer.length > MAX_IMAGE_SIZE_BYTES) {
+        throw new Error(
+          `Image size exceeds 10MB limit: ${(img.buffer.length / 1024 / 1024).toFixed(2)}MB`
+        );
+      }
       const base64 = img.buffer.toString("base64");
       return { type: "character" as const, image_file: `data:${mimeType};base64,${base64}` };
     });
@@ -346,32 +372,28 @@ export async function generateImage(
 
   if (data.data?.image_urls && data.data.image_urls.length > 0) {
     for (const imageUrl of data.data.image_urls) {
-      const buffer = await downloadImage(imageUrl, req.timeoutMs);
-      images.push({
-        buffer,
-        mimeType: "image/png",
-      });
+      const { buffer, mimeType } = await downloadImage(imageUrl, req.timeoutMs);
+      images.push({ buffer, mimeType });
     }
   } else if (data.data?.image_base64 && data.data.image_base64.length > 0) {
     for (const base64 of data.data.image_base64) {
+      const mimeType = detectMimeType(base64);
       images.push({
         buffer: Buffer.from(base64, "base64"),
-        mimeType: "image/png",
+        mimeType,
       });
     }
   } else if (data.items && Array.isArray(data.items) && data.items.length > 0) {
     for (const item of data.items) {
       if (item.base64) {
+        const mimeType = detectMimeType(item.base64);
         images.push({
           buffer: Buffer.from(item.base64, "base64"),
-          mimeType: "image/png",
+          mimeType,
         });
       } else if (item.url) {
-        const buffer = await downloadImage(item.url, req.timeoutMs);
-        images.push({
-          buffer,
-          mimeType: "image/png",
-        });
+        const { buffer, mimeType } = await downloadImage(item.url, req.timeoutMs);
+        images.push({ buffer, mimeType });
       }
     }
   }
