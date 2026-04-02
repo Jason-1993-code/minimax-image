@@ -23,15 +23,15 @@
 ## 安装
 
 ```bash
-openclaw plugins install @openclaw/minimax-image-ng-ng
+openclaw plugins install @openclaw/minimax-image-ng
 ```
 
 ### 离线安装
 
-从 [GitHub Releases](https://github.com/Jason-1993-code/minimax-image-ng-ng/releases) 下载安装包，使用本地路径安装：
+从 [GitHub Releases](https://github.com/Jason-1993-code/minimax-image-ng/releases) 下载安装包，使用本地路径安装：
 
 ```bash
-openclaw plugins install https://github.com/Jason-1993-code/minimax-image-ng-ng/releases/download/v1.2.0/minimax-image-ng-ng-1.2.0.zip
+openclaw plugins install https://github.com/Jason-1993-code/minimax-image-ng/releases/download/v1.2.0/minimax-image-ng-1.2.0.zip
 ```
 
 安装后验证：
@@ -86,7 +86,7 @@ export MINIMAX_IMAGE_API_KEY="your-image-specific-key"
 {
   "plugins": {
     "entries": {
-      "minimax-image-ng-ng": {
+      "minimax-image-ng": {
         "enabled": true,
         "config": {
           "apiKey": "your-api-key",
@@ -114,7 +114,7 @@ export MINIMAX_IMAGE_API_KEY="your-image-specific-key"
 {
   "agents": {
     "defaults": {
-      "imageGenerationModel": "minimax-image-ng-ng"
+      "imageGenerationModel": "minimax-image-ng"
     }
   }
 }
@@ -141,7 +141,7 @@ export MINIMAX_IMAGE_API_KEY="your-image-specific-key"
 |--------|------|------|
 | `model` | 文本推理模型 | `"minimax-portal/MiniMax-M2.7"` |
 | `imageModel` | 能理解图片输入的推理模型 | `"minimax/MiniMax-VL-01"` |
-| `imageGenerationModel` | **图像生成模型** | `"minimax-image-ng-ng"` |
+| `imageGenerationModel` | **图像生成模型** | `"minimax-image-ng"` |
 
 重启 gateway 使配置生效：
 
@@ -205,7 +205,7 @@ openclaw chat "根据这张图生成一幅类似的风格"
 ### 代码调用
 
 ```typescript
-import { generateImage } from "@openclaw/minimax-image-ng-ng";
+import { generateImage } from "@openclaw/minimax-image-ng";
 
 const result = await generateImage(
   { prompt: "A beautiful sunset over the ocean" },
