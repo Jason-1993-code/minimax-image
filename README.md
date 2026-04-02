@@ -23,25 +23,25 @@ OpenClaw plugin for MiniMax text-to-image and image-to-image generation via the 
 ## Installation
 
 ```bash
-openclaw plugins install @openclaw/minimax-image-ng
+openclaw plugins install @openclaw/minimax-image-ng-ng
 ```
 
 ### Offline Installation
 
-Download the plugin package from [GitHub Releases](https://github.com/Jason-1993-code/minimax-image/releases) and install via local path:
+Download the plugin package from [GitHub Releases](https://github.com/Jason-1993-code/minimax-image-ng-ng/releases) and install via local path:
 
 ```bash
-openclaw plugins install https://github.com/Jason-1993-code/minimax-image/releases/download/v1.2.0/minimax-image-ng-1.2.0.zip
+openclaw plugins install https://github.com/Jason-1993-code/minimax-image-ng-ng/releases/download/v1.2.0/minimax-image-ng-ng-1.2.0.zip
 ```
 
 Verify installation:
 
 ```bash
 openclaw plugins list
-# Confirm minimax-image appears in the plugin list
+# Confirm minimax-image-ng appears in the plugin list
 
-openclaw plugins inspect minimax-image
-# Confirm Capabilities include image-generation: minimax-image
+openclaw plugins inspect minimax-image-ng
+# Confirm Capabilities include image-generation: minimax-image-ng
 ```
 
 ## How It Works
@@ -51,11 +51,11 @@ OpenClaw exposes image generation through a unified `image_generate` tool. When 
 ```
 User Input → LLM decides to use a tool → image_generate tool
   → OpenClaw queries ImageGenerationProvider routing
-  → minimax-image.generateImage() is called
+  → minimax-image-ng.generateImage() is called
   → MiniMax API returns image → User receives image
 ```
 
-Key: `minimax-image` (image generation) and `minimax-portal` (text chat) are **two separate providers**. Image generation requests need `imageGenerationModel` pointed to `minimax-image`, otherwise the LLM won't route to this plugin automatically.
+Key: `minimax-image-ng` (image generation) and `minimax-portal` (text chat) are **two separate providers**. Image generation requests need `imageGenerationModel` pointed to `minimax-image-ng`, otherwise the LLM won't route to this plugin automatically.
 
 ## Configuration
 
@@ -80,13 +80,13 @@ export MINIMAX_IMAGE_API_KEY="your-image-specific-key"
 
 #### Option C: Via config file
 
-In `openclaw.json` under `plugins.entries.minimax-image.config`:
+In `openclaw.json` under `plugins.entries.minimax-image-ng.config`:
 
 ```json
 {
   "plugins": {
     "entries": {
-      "minimax-image-ng": {
+      "minimax-image-ng-ng": {
         "enabled": true,
         "config": {
           "apiKey": "your-api-key",
@@ -114,7 +114,7 @@ Add to `openclaw.json` under `agents.defaults`:
 {
   "agents": {
     "defaults": {
-      "imageGenerationModel": "minimax-image-ng"
+      "imageGenerationModel": "minimax-image-ng-ng"
     }
   }
 }
@@ -127,8 +127,8 @@ Or specify a concrete model:
   "agents": {
     "defaults": {
       "imageGenerationModel": {
-        "primary": "minimax-image/image-01-live",
-        "fallbacks": ["minimax-image/image-01"]
+        "primary": "minimax-image-ng/image-01-live",
+        "fallbacks": ["minimax-image-ng/image-01"]
       }
     }
   }
@@ -141,7 +141,7 @@ Or specify a concrete model:
 |------------|---------|---------|
 | `model` | Text inference model | `"minimax-portal/MiniMax-M2.7"` |
 | `imageModel` | Inference model that understands image input | `"minimax/MiniMax-VL-01"` |
-| `imageGenerationModel` | **Image generation model** | `"minimax-image-ng"` |
+| `imageGenerationModel` | **Image generation model** | `"minimax-image-ng-ng"` |
 
 Restart the gateway for changes to take effect:
 
@@ -151,7 +151,7 @@ openclaw gateway restart
 
 ## Configuration Reference
 
-### Plugin Config (plugins.entries.minimax-image.config)
+### Plugin Config (plugins.entries.minimax-image-ng.config)
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -185,7 +185,7 @@ After completing "Step 2: Configure Image Generation Routing", simply chat:
 openclaw chat "Generate a photo of a cat"
 ```
 
-The LLM will automatically call the `image_generate` tool, and OpenClaw will route to `minimax-image`.
+The LLM will automatically call the `image_generate` tool, and OpenClaw will route to `minimax-image-ng`.
 
 ### Image-to-Image (I2I)
 
@@ -205,7 +205,7 @@ I2I requirements:
 ### Code Usage
 
 ```typescript
-import { generateImage } from "@openclaw/minimax-image-ng";
+import { generateImage } from "@openclaw/minimax-image-ng-ng";
 
 const result = await generateImage(
   { prompt: "A beautiful sunset over the ocean" },
@@ -247,15 +247,15 @@ The plugin searches for API keys in the following order:
 
 1. Environment variable `MINIMAX_IMAGE_API_KEY` (highest priority)
 2. Environment variable `MINIMAX_API_KEY` (same as official MiniMax provider, fallback)
-3. Plugin config `plugins.entries.minimax-image.config.apiKey`
-4. OpenClaw Auth Profile `minimax-image` API Key credential
+3. Plugin config `plugins.entries.minimax-image-ng.config.apiKey`
+4. OpenClaw Auth Profile `minimax-image-ng` API Key credential
 
 ## Relationship with minimax-portal
 
-| | minimax-image (this plugin) | minimax-portal (built-in) |
+| | minimax-image-ng (this plugin) | minimax-portal (built-in) |
 |--|------------------------------|---------------------------|
 | **Capability** | Image generation | Text chat / LLM |
-| **Provider ID** | `minimax-image` | `minimax-portal` |
+| **Provider ID** | `minimax-image-ng` | `minimax-portal` |
 | **Routes via `imageGenerationModel`** | ✅ | ❌ |
 | **Routes via `model`** | ❌ | ✅ |
 
