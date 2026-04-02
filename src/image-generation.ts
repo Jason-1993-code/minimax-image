@@ -157,7 +157,7 @@ export function resolveApiKey(
   }
 
   if (authStore) {
-    const profileIds = listProfilesForProvider(authStore, "minimax-image");
+    const profileIds = listProfilesForProvider(authStore, "minimax-image-ng");
     if (profileIds.length > 0) {
       const profile = authStore.profiles?.[profileIds[0]];
       if (profile && profile.type === "api_key" && profile.key) {

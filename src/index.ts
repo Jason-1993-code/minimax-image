@@ -29,14 +29,14 @@ export interface MiniMaxImagePluginConfig {
 }
 
 export default definePluginEntry({
-  id: "minimax-image",
-  name: "MiniMax Image",
-  description: "MiniMax image generation provider (text-to-image and image-to-image)",
+  id: "minimax-image-ng",
+  name: "MiniMax Image NG",
+  description: "MiniMax image generation provider (text-to-image and image-to-image) - Next Generation",
   register(api) {
     // Register the MiniMax image generation provider
     const provider: ImageGenerationProvider = {
-      id: "minimax-image",
-      label: "MiniMax Image",
+      id: "minimax-image-ng",
+      label: "MiniMax Image NG",
       defaultModel: "image-01",
       models: ["image-01", "image-01-live"],
       capabilities: CAPABILITIES,

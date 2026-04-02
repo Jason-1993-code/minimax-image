@@ -23,7 +23,7 @@ OpenClaw plugin for MiniMax text-to-image and image-to-image generation via the 
 ## Installation
 
 ```bash
-openclaw plugins install @openclaw/minimax-image
+openclaw plugins install @openclaw/minimax-image-ng
 ```
 
 ### Offline Installation
@@ -31,7 +31,7 @@ openclaw plugins install @openclaw/minimax-image
 Download the plugin package from [GitHub Releases](https://github.com/Jason-1993-code/minimax-image/releases) and install via local path:
 
 ```bash
-openclaw plugins install https://github.com/Jason-1993-code/minimax-image/releases/download/v1.1.0/minimax-image-1.1.0.zip
+openclaw plugins install https://github.com/Jason-1993-code/minimax-image/releases/download/v1.2.0/minimax-image-ng-1.2.0.zip
 ```
 
 Verify installation:
@@ -86,7 +86,7 @@ In `openclaw.json` under `plugins.entries.minimax-image.config`:
 {
   "plugins": {
     "entries": {
-      "minimax-image": {
+      "minimax-image-ng": {
         "enabled": true,
         "config": {
           "apiKey": "your-api-key",
@@ -114,7 +114,7 @@ Add to `openclaw.json` under `agents.defaults`:
 {
   "agents": {
     "defaults": {
-      "imageGenerationModel": "minimax-image"
+      "imageGenerationModel": "minimax-image-ng"
     }
   }
 }
@@ -141,7 +141,7 @@ Or specify a concrete model:
 |------------|---------|---------|
 | `model` | Text inference model | `"minimax-portal/MiniMax-M2.7"` |
 | `imageModel` | Inference model that understands image input | `"minimax/MiniMax-VL-01"` |
-| `imageGenerationModel` | **Image generation model** | `"minimax-image"` |
+| `imageGenerationModel` | **Image generation model** | `"minimax-image-ng"` |
 
 Restart the gateway for changes to take effect:
 
@@ -205,7 +205,7 @@ I2I requirements:
 ### Code Usage
 
 ```typescript
-import { generateImage } from "@openclaw/minimax-image";
+import { generateImage } from "@openclaw/minimax-image-ng";
 
 const result = await generateImage(
   { prompt: "A beautiful sunset over the ocean" },

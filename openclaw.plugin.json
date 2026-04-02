@@ -1,19 +1,19 @@
 {
-  "id": "minimax-image",
+  "id": "minimax-image-ng",
   "name": "MiniMax Image",
   "description": "MiniMax image generation provider (text-to-image and image-to-image)",
-  "version": "1.1.0",
-  "providers": ["minimax-image"],
+  "version": "1.2.0",
+  "providers": ["minimax-image-ng"],
   "providerAuthEnvVars": {
-    "minimax-image": ["MINIMAX_IMAGE_API_KEY", "MINIMAX_API_KEY"]
+    "minimax-image-ng": ["MINIMAX_IMAGE_API_KEY", "MINIMAX_API_KEY"]
   },
   "providerAuthChoices": [
     {
-      "provider": "minimax-image",
+      "provider": "minimax-image-ng",
       "method": "api-key",
       "choiceId": "minimax-image-global",
       "choiceLabel": "MiniMax Image (Global)",
-      "groupId": "minimax-image",
+      "groupId": "minimax-image-ng",
       "groupLabel": "MiniMax Image",
       "envVar": "MINIMAX_IMAGE_API_KEY",
       "optionKey": "minimaxImageGlobalApiKey",
@@ -23,11 +23,11 @@
       "onboardingScopes": ["image-generation"]
     },
     {
-      "provider": "minimax-image",
+      "provider": "minimax-image-ng",
       "method": "api-key",
       "choiceId": "minimax-image-cn",
       "choiceLabel": "MiniMax Image (CN)",
-      "groupId": "minimax-image",
+      "groupId": "minimax-image-ng",
       "groupLabel": "MiniMax Image",
       "envVar": "MINIMAX_IMAGE_API_KEY",
       "optionKey": "minimaxImageCnApiKey",

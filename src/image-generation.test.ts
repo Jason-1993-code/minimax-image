@@ -44,7 +44,7 @@ describe("MiniMax Image Generation", () => {
         profiles: {
           "profile-1": {
             type: "api_key" as const,
-            provider: "minimax-image",
+            provider: "minimax-image-ng",
             key: "profile-api-key",
           },
         },
@@ -60,7 +60,7 @@ describe("MiniMax Image Generation", () => {
         profiles: {
           "profile-1": {
             type: "api_key" as const,
-            provider: "minimax-image",
+            provider: "minimax-image-ng",
             key: "profile-api-key",
           },
         },
@@ -588,7 +588,7 @@ describe("MiniMax Image Generation", () => {
         await generateImage(
           {
             prompt: "a cat",
-            authStore: { profiles: { "auth-profile-1": { type: "api_key" as const, provider: "minimax-image", key: "auth-profile-key" } } } as any,
+            authStore: { profiles: { "auth-profile-1": { type: "api_key" as const, provider: "minimax-image-ng", key: "auth-profile-key" } } } as any,
           },
           {}
         );
@@ -837,11 +837,11 @@ describe("MiniMax Image Generation", () => {
 
   describe("manifest metadata", () => {
     const manifest: Record<string, any> = {
-      id: "minimax-image",
-      providers: ["minimax-image"],
+      id: "minimax-image-ng",
+      providers: ["minimax-image-ng"],
       providerAuthChoices: [
         {
-          provider: "minimax-image",
+          provider: "minimax-image-ng",
           method: "api-key",
           choiceId: "minimax-image-global",
           cliFlag: "--minimax-image-global-api-key",
@@ -849,7 +849,7 @@ describe("MiniMax Image Generation", () => {
           onboardingScopes: ["image-generation"],
         },
         {
-          provider: "minimax-image",
+          provider: "minimax-image-ng",
           method: "api-key",
           choiceId: "minimax-image-cn",
           cliFlag: "--minimax-image-cn-api-key",
@@ -864,7 +864,7 @@ describe("MiniMax Image Generation", () => {
     });
 
     it("should have providers array containing minimax-image", () => {
-      expect(manifest.providers).toContain("minimax-image");
+      expect(manifest.providers).toContain("minimax-image-ng");
     });
 
     it("should have providerAuthChoices with cliFlag fields", () => {
@@ -896,7 +896,7 @@ describe("MiniMax Image Generation", () => {
       const manifestPath = resolve(dirname(testFile), "../openclaw.plugin.json");
       const content = await readFile(manifestPath, "utf-8");
       const parsed = JSON.parse(content);
-      expect(parsed.providerAuthEnvVars?.["minimax-image"]).toContain("MINIMAX_IMAGE_API_KEY");
+      expect(parsed.providerAuthEnvVars?.["minimax-image-ng"]).toContain("MINIMAX_IMAGE_API_KEY");
     });
   });
 });
