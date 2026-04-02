@@ -33,6 +33,33 @@ openclaw plugins install https://github.com/Jason-1993-code/minimax-image-ng/rel
 - ClawHub: not published yet (publisher account age requirement not met)
 - npm: not published yet (`openclaw plugins install @openclaw/minimax-image-ng` is not available for now)
 
+## Uninstall / Rollback
+
+1. Uninstall the plugin:
+
+```bash
+openclaw plugins uninstall minimax-image-ng
+```
+
+2. Remove image-generation routing to this provider from `openclaw.json`:
+
+- Remove or replace `agents.defaults.imageGenerationModel` if it points to `minimax-image-ng`.
+
+3. Remove plugin config from `openclaw.json`:
+
+- Delete `plugins.entries.minimax-image-ng` (or at minimum remove `plugins.entries.minimax-image-ng.config`).
+
+4. Restart gateway:
+
+```bash
+openclaw gateway restart
+```
+
+Optional credential cleanup:
+
+- Remove `MINIMAX_IMAGE_API_KEY` if you no longer use MiniMax image generation.
+- Keep `MINIMAX_API_KEY` if it is still used by other MiniMax providers/models.
+
 Verify installation:
 
 ```bash

@@ -33,6 +33,33 @@ openclaw plugins install https://github.com/Jason-1993-code/minimax-image-ng/rel
 - ClawHub：暂未发布（发布账号限制未满足）
 - npm：暂未发布（`openclaw plugins install @openclaw/minimax-image-ng` 当前不可用）
 
+## 卸载 / 回滚
+
+1. 卸载插件：
+
+```bash
+openclaw plugins uninstall minimax-image-ng
+```
+
+2. 清理 `openclaw.json` 中的图像路由配置：
+
+- 若 `agents.defaults.imageGenerationModel` 指向 `minimax-image-ng`，请删除或改为其他 Provider。
+
+3. 清理 `openclaw.json` 中的插件配置：
+
+- 删除 `plugins.entries.minimax-image-ng`（至少删除 `plugins.entries.minimax-image-ng.config`）。
+
+4. 重启 gateway：
+
+```bash
+openclaw gateway restart
+```
+
+可选凭据清理：
+
+- 若不再使用 MiniMax 图像生成，可删除 `MINIMAX_IMAGE_API_KEY`。
+- 若其他 MiniMax Provider/模型仍使用 `MINIMAX_API_KEY`，请保留该变量。
+
 安装后验证：
 
 ```bash
