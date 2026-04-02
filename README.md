@@ -20,19 +20,18 @@ OpenClaw plugin for MiniMax text-to-image and image-to-image generation via the 
 - [MiniMax T2I API Docs](https://platform.minimaxi.com/docs/api-reference/image-generation-t2i.md)
 - [MiniMax I2I API Docs](https://platform.minimaxi.com/docs/api-reference/image-generation-i2i.md)
 
-## Installation
+## Installation (Currently Available)
 
-```bash
-openclaw plugins install @openclaw/minimax-image-ng
-```
-
-### Offline Installation
-
-Download the plugin package from [GitHub Releases](https://github.com/Jason-1993-code/minimax-image-ng/releases) and install via local path:
+Currently, installation is available via GitHub Releases only:
 
 ```bash
 openclaw plugins install https://github.com/Jason-1993-code/minimax-image-ng/releases/download/v1.2.1/minimax-image-ng-v1.2.1.zip
 ```
+
+## Other Distribution Channels (Not Available Yet)
+
+- ClawHub: not published yet (publisher account age requirement not met)
+- npm: not published yet (`openclaw plugins install @openclaw/minimax-image-ng` is not available for now)
 
 Verify installation:
 
@@ -55,7 +54,7 @@ User Input → LLM decides to use a tool → image_generate tool
   → MiniMax API returns image → User receives image
 ```
 
-Key: `minimax-image-ng` (image generation) and `minimax-portal` (text chat) are **two separate providers**. Image generation requests need `imageGenerationModel` pointed to `minimax-image-ng`, otherwise the LLM won't route to this plugin automatically.
+Key: image generation provider routing is separate from text model routing. To route image requests to this plugin, set `imageGenerationModel` to `minimax-image-ng`.
 
 ## Configuration
 
@@ -139,7 +138,7 @@ Or specify a concrete model:
 
 | Config key | Purpose | Example |
 |------------|---------|---------|
-| `model` | Text inference model | `"minimax-portal/MiniMax-M2.7"` |
+| `model` | Text inference model | `"minimax/MiniMax-M2.7"` |
 | `imageModel` | Inference model that understands image input | `"minimax/MiniMax-VL-01"` |
 | `imageGenerationModel` | **Image generation model** | `"minimax-image-ng"` |
 
@@ -164,6 +163,7 @@ openclaw gateway restart
 | `promptOptimizer` | boolean | `false` | Enable prompt optimizer |
 | `aigcWatermark` | boolean | `false` | Embed AIGC watermark |
 | `style` | string | - | Style parameter (image-01-live only) |
+| `styleWeight` | number | `0.8` | Style weight (image-01-live only, range `(0, 1]`) |
 | `width` | number | - | Image width in pixels (image-01 only) |
 | `height` | number | - | Image height in pixels (image-01 only) |
 | `seed` | number | - | Random seed for reproducibility |
@@ -252,55 +252,29 @@ The plugin searches for API keys in the following order:
 3. Plugin config `plugins.entries.minimax-image-ng.config.apiKey`
 4. OpenClaw Auth Profile `minimax-image-ng` API Key credential
 
-## Differences from Built-in minimax Plugin
+## Positioning vs Built-in MiniMax Provider
 
-OpenClaw (v1.4+) includes a built-in `minimax` image generation Provider, but its functionality is limited for advanced users.
+This plugin focuses on MiniMax image generation with explicit parameter control and predictable routing.
 
-### Feature Comparison
+### Capabilities Provided by `minimax-image-ng`
 
-| Feature | Built-in `minimax` | `minimax-image-ng` |
-|---------|-------------------|-------------------|
-| image-01 model | ✅ Supported | ✅ Supported |
-| image-01-live model | ❌ Not supported | ✅ Supported |
-| style parameter (portrait/general/cinematic/etc.) | ❌ Not supported | ✅ Supported |
-| Custom width/height | ❌ Not supported | ✅ Supported |
-| aspect_ratio presets | ⚠️ Partial | ✅ Full support |
-| Prompt optimizer | ❌ Not supported | ✅ Supported |
-| AIGC watermark | ❌ Not supported | ✅ Supported |
-| Image-to-image (I2I) | ⚠️ Basic only | ✅ Full support |
+- Provider ID: `minimax-image-ng`
+- Models: `image-01`, `image-01-live`
+- T2I and I2I (single `subject_reference` image)
+- `aspectRatio` for both models (with `21:9` only on `image-01`)
+- `width`/`height` for `image-01` only
+- `style` and `styleWeight` for `image-01-live` only
+- `promptOptimizer`, `aigcWatermark`, and `seed`
 
-### When to Use Each
+### Routing Notes
 
-**Use built-in `minimax`**:
-- Only need basic text-to-image generation
-- image-01 model meets your requirements
-- Prefer minimal plugins
+- `imageGenerationModel` controls which provider handles image generation.
+- Set `agents.defaults.imageGenerationModel` to `minimax-image-ng` to route image requests to this plugin.
+- Text model routing (`model`) is separate from image generation routing.
 
-**Use `minimax-image-ng`**:
-- Need `image-01-live` model (better for portrait photography)
-- Need style parameter to control style (portrait/general/cinematic/travel/etc.)
-- Need custom image dimensions instead of fixed aspect ratios
-- Need image-to-image (I2I) functionality
+### About Built-in MiniMax
 
-### Coexistence
-
-Both plugins can be installed simultaneously without conflict:
-
-- Built-in `minimax` Provider ID: `minimax`
-- This plugin Provider ID: `minimax-image-ng`
-
-Use `imageGenerationModel` config to choose which plugin generates images.
-
-## Relationship with minimax-portal
-
-| | minimax-image-ng (this plugin) | minimax-portal (built-in) |
-|--|------------------------------|---------------------------|
-| **Capability** | Image generation | Text chat / LLM |
-| **Provider ID** | `minimax-image-ng` | `minimax-portal` |
-| **Routes via `imageGenerationModel`** | ✅ | ❌ |
-| **Routes via `model`** | ❌ | ✅ |
-
-The two are independent. Both share the same credential system via `MINIMAX_API_KEY`.
+Built-in provider behavior can vary by OpenClaw version. For the latest built-in MiniMax capability matrix, refer to OpenClaw official docs.
 
 ## Development
 
