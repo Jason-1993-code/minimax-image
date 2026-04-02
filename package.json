@@ -13,7 +13,15 @@
   "openclaw": {
     "extensions": [
       "./dist/index.js"
-    ]
+    ],
+    "compat": {
+      "pluginApi": ">=2026.3.23-2",
+      "minGatewayVersion": "2026.3.23-2"
+    },
+    "build": {
+      "openclawVersion": "2026.3.23-2",
+      "pluginSdkVersion": "2026.3.23-2"
+    }
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
